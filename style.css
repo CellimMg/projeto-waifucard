@@ -1,0 +1,22 @@
+html,
+body {
+    height: 100%;
+    width: 100%;
+    background-image: linear-gradient(to bottom right, red, yellow);
+}
+
+.cards {
+    width: 100%;
+    margin: auto;
+    display: flex;
+    flex-wrap: wrap;
+    flex-grow: 2;
+}
+
+.card {
+    width: 117px;
+    height: 146px;
+    background-color: white;
+    margin: auto;
+    margin-right: 10px;
+}

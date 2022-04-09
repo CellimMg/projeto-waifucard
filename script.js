@@ -1,6 +1,6 @@
-let seqCartas = [];
-
-let selecCartas = [];
+const seqCartas = [];
+const divSelecionada = [];
+let pontuacao = 0;
 
 function setupInicial() {
     let qtdCartas = -1;
@@ -11,6 +11,21 @@ function setupInicial() {
     } while (qtdCartas < 4 || qtdCartas > 14 || (qtdCartas % 2 != 0));
     distribuirImagens(qtdCartas);
     atribuirLarguraAltura(qtdCartas);
+    criarDivsCartas();
+}
+
+function criarDivsCartas() {
+    const element = document.querySelector(".cards");
+    seqCartas.forEach((elemento, index, array) => {
+        element.innerHTML += `<div class="card" onclick="onClickCard(this)">
+            <div class="front">
+                <img src="assets/images/card-back.jpg">
+            </div>
+            <div class="back">
+                <img src="assets/images/${array[index]}">
+            </div>
+        </div>`;
+    });
 }
 
 function atribuirLarguraAltura(qtdCartas) {
@@ -57,12 +72,60 @@ function randomizarPosicoes(vetor) {
     }
 }
 
+function onClickCard(divClicada) {
+    flipCardToFront(divClicada);
+    armazenarDadosClick(divClicada);
+    removeClickFromCard(divClicada);
+    if (hasDoubleSelected()) {
+        if (isPair()) {
+            pontuacao++;
+            limparClicaveis();
+        } else {
+            setTimeout(() => {
+                flipCardsToBack();
+                setClickToCards();
+                limparClicaveis();
+
+            }, 1000);
+
+        }
+    }
+}
+
 function armazenarDadosClick(divClicada) {
-    const element = divClicada.querySelector(".imagem-waifu");
-    selecCartas.push(element);
+    divSelecionada.push(divClicada);
+}
+
+function isPair() {
+    const name0 = divSelecionada[0].querySelector(".back img").getAttribute("src");
+    const name1 = divSelecionada[1].querySelector(".back img").getAttribute("src");
+    return name0 === name1;
 }
 
 function limparClicaveis() {
-    selecCartas.
+    divSelecionada.length = 0;
+}
+
+function hasDoubleSelected() {
+    return divSelecionada.length == 2;
+}
+
+function removeClickFromCard(divClicada) {
+    divClicada.removeAttribute('onclick');
+}
+
+
+function setClickToCards() {
+    divSelecionada[0].setAttribute('onclick', "onClickCard(this)");
+    divSelecionada[1].setAttribute('onclick', "onClickCard(this)");
+}
+
+function flipCardToFront(divClicada) {
+    divClicada.style.transform = "rotateY(180deg)"
+}
+
+function flipCardsToBack() {
+    divSelecionada[0].style.transform = "rotateY(0deg)";
+    divSelecionada[1].style.transform = "rotateY(0deg)";
 }
 

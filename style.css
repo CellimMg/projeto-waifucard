@@ -3,10 +3,11 @@ body {
     height: 100%;
     width: 100%;
     background-image: linear-gradient(to bottom right, red, yellow);
+    display: flex;
+    align-items: center;
 }
 
 .cards {
-    width: 100%;
     margin: auto;
     display: flex;
     flex-wrap: wrap;
@@ -14,9 +15,55 @@ body {
 }
 
 .card {
+    perspective: 500px;
+    border-radius: 15px;
     width: 117px;
     height: 146px;
+    background-color: red;
+    margin: 10px;
+    padding: 5px;
+    box-sizing: border-box;
+    border: solid 1px black;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card:hover {
+    cursor: pointer;
+    box-shadow: 0px 0px 10px white;
+    transform: rotateY(180deg);
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+}
+
+.card div {
+    position: absolute;
+    backface-visibility: hidden;
+    width: 107px;
+    height: 136px;
+    border-radius: 15px;
     background-color: white;
-    margin: auto;
-    margin-right: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card div:nth-child(2) {
+    display: flex;
+    align-items: flex-start;
+    transform: rotateY(180deg);
+}
+
+.card div img {
+    height: 60px;
+    width: 60px;
+}
+
+
+.card div:nth-child(2) img {
+    height: 100%;
+    width: 100%;
+    border-radius: 15px;
 }

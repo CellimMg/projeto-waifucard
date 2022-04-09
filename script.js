@@ -1,9 +1,15 @@
-const seqCartas = [];
-const divSelecionada = [];
-let pontuacao = 0;
+let seqCartas = [];
+let divSelecionada = [];
+let pontuacao = 0; //a cada acerto aumenta
+let qtdJogadas = 0;
+let intervalController;
+let seconds = 0;
+let minutes = 0;
+let qtdCartas = 0;
+let lastClick
 
 function setupInicial() {
-    let qtdCartas = -1;
+    qtdCartas = -1;
     do {
         qtdCartas = prompt("Olá, jogador! Vamos jogar cartas? O objetivo deste jogo é acertar o par de cartas repetidas em uma mesma jogada. Para começar, informe quantidade de cartas com as quais você deseja jogar. Lembrando que só será aceito um número PAR de 4 a 14.");
         qtdCartas = Number.parseInt(qtdCartas);
@@ -12,6 +18,7 @@ function setupInicial() {
     distribuirImagens(qtdCartas);
     atribuirLarguraAltura(qtdCartas);
     criarDivsCartas();
+    setTimer();
 }
 
 function criarDivsCartas() {
@@ -26,28 +33,6 @@ function criarDivsCartas() {
             </div>
         </div>`;
     });
-}
-
-function atribuirLarguraAltura(qtdCartas) {
-    const cardPorLinha = qtdCartas / 2;
-    atribuirLargura(cardPorLinha);
-    atribuirAltura();
-}
-
-function atribuirLargura(cardPorLinha) {
-    //a largura de cada carta = 137px (117 + 10px pra cada lado horizontal)
-    const larguraMaxima = cardPorLinha * 137;
-    const element = document.querySelector(".cards");
-    element.style.maxWidth = `${larguraMaxima}px`;
-    element.style.minWidth = `${137}px`;
-    console.log("Low");
-}
-
-function atribuirAltura() {
-    //a altura de cada carta = 166px (146px + 10px pra cada lado verticalmente)
-    const alturaMinima = 166 * 2;
-    const element = document.querySelector(".cards");
-    element.style.minHeight = `${alturaMinima}px`;
 }
 
 function distribuirImagens(qtdCartas) {
@@ -73,53 +58,94 @@ function randomizarPosicoes(vetor) {
 }
 
 function onClickCard(divClicada) {
-    flipCardToFront(divClicada);
-    armazenarDadosClick(divClicada);
-    removeClickFromCard(divClicada);
-    if (hasDoubleSelected()) {
-        if (isPair()) {
-            pontuacao++;
-            limparClicaveis();
-        } else {
-            setTimeout(() => {
-                flipCardsToBack();
-                setClickToCards();
-                limparClicaveis();
+    if (lastClick >= Date.now() - 1000) { ///
+        return;
+    } else {
+        qtdJogadas++;
+        atribuirJogadas(qtdJogadas);
+        flipCardToFront(divClicada);
+        armazenarDadosClick(divClicada);
+        removeClickFromCard(divClicada);
+        if (hasDoubleSelected()) {
+            if (isPair()) {
+                pontuacao++;
+                limparClicadas();
+            } else {
+                setTimeout(() => {
+                    flipCardsToBack();
+                    setClickToCards();
+                    limparClicadas();
+                }, 1000);
+            }
 
-            }, 1000);
+            //se venceu!
+            if (pontuacao * 2 == qtdCartas) {
+                setTimeout(() => {
+                    cancelTimer();
+                    alert(`Você venceu em ${qtdJogadas} jogadas e ${seconds + (minutes * 60)} segundos!`);
+                    const jogarNovamente = prompt('Deseja jogar novamente?');
+                    if (jogarNovamente === "sim") {
+                        const element = document.querySelector(".cards");
+                        element.innerHTML = "";
+                        clean();
+                        setupInicial();
+                    }
+                }, 600);
 
+            }
         }
     }
+
+    lastClick = Date.now();
 }
 
 function armazenarDadosClick(divClicada) {
     divSelecionada.push(divClicada);
 }
 
+//FUNCOES COMPARATIVAS
 function isPair() {
     const name0 = divSelecionada[0].querySelector(".back img").getAttribute("src");
     const name1 = divSelecionada[1].querySelector(".back img").getAttribute("src");
     return name0 === name1;
 }
 
-function limparClicaveis() {
-    divSelecionada.length = 0;
-}
-
 function hasDoubleSelected() {
     return divSelecionada.length == 2;
+}
+
+function limparClicadas() {
+    divSelecionada.length = 0;
 }
 
 function removeClickFromCard(divClicada) {
     divClicada.removeAttribute('onclick');
 }
 
-
 function setClickToCards() {
     divSelecionada[0].setAttribute('onclick', "onClickCard(this)");
     divSelecionada[1].setAttribute('onclick', "onClickCard(this)");
 }
 
+
+//FUNCOES DO TIMER
+function setTimer() {
+    intervalController = setInterval(() => {
+        seconds++;
+        if (seconds == 60) {
+            seconds = 0;
+            minutes++;
+        }
+
+        atribuirTempo();
+    }, 1000);
+}
+
+function cancelTimer() {
+    clearInterval(intervalController);
+}
+
+//FUNCOES VISUAIS
 function flipCardToFront(divClicada) {
     divClicada.style.transform = "rotateY(180deg)"
 }
@@ -129,3 +155,55 @@ function flipCardsToBack() {
     divSelecionada[1].style.transform = "rotateY(0deg)";
 }
 
+function atribuirTempo() {
+    const element = document.querySelector(".placar div:last-child div:first-child");
+    let minutesText, secondsText;
+    if (minutes >= 10) {
+        minutesText = minutes.toString();
+    } else {
+        minutesText = `0${minutes}`;
+    }
+    if (seconds >= 10) {
+        secondsText = seconds.toString();
+    } else {
+        secondsText = `0${seconds}`;
+    }
+    element.innerHTML = `${minutesText}:${secondsText}`;
+}
+
+function atribuirJogadas(qtdJogadas) {
+    const element = document.querySelector(".placar div:last-child div:last-child");
+    element.innerHTML = qtdJogadas;
+}
+
+function atribuirLarguraAltura(qtdCartas) {
+    const cardPorLinha = qtdCartas / 2;
+    atribuirLargura(cardPorLinha);
+    atribuirAltura();
+}
+
+function atribuirLargura(cardPorLinha) {
+    //a largura de cada carta = 137px (117 + 10px pra cada lado horizontal)
+    const larguraMaxima = cardPorLinha * 137;
+    const element = document.querySelector(".cards");
+    element.style.maxWidth = `${larguraMaxima}px`;
+    element.style.minWidth = `${137}px`;
+}
+
+function atribuirAltura() {
+    //a altura de cada carta = 166px (146px + 10px pra cada lado verticalmente)
+    const alturaMinima = 166 * 2;
+    const element = document.querySelector(".cards");
+    element.style.minHeight = `${alturaMinima}px`;
+}
+
+function clean() {
+    seconds = 0;
+    minutes = 0;
+    seqCartas = [];
+    divSelecionada = [];
+    pontuacao = 0;
+    qtdJogadas = 0;
+    atribuirJogadas(qtdJogadas);
+    qtdCartas = 0;
+}
